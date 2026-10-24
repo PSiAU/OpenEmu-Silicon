@@ -12,9 +12,13 @@ The MAME headless source is intentionally not committed here because it is very 
 ./Scripts/prepare-mame-core.sh
 ```
 
-That clones `stuartcarnie/mame` at the pinned commit in `deps-mame-revision.txt` into `MAME/deps/mame` and applies `patches/mame-headless-clang21-apple.patch`.
+That clones official `mamedev/mame` tag `mame0289` at commit `f34f02505e32c1993c6a782b6814232cbfc74e36` into `MAME/deps/mame` and applies `patches/mame-0289-headless.patch`. The patch ports the OpenEmu headless backend from `OpenEmu-Silicon/mame` commit `fac13e827b7b8cfa4ee4f5760198d31241e2a544`, including memory access and cheats.
 
-The patch also backports MAME commit `b5fafba307ba7acc2aea90681c71a3d43aa9cac3`, which fixes a V60 float-to-integer conversion issue reported upstream as causing glitched Virtua Racing / Sega Model 1 graphics on aarch64.
+MAME 0.289 already includes the V60 conversion fix previously backported for Sega Model 1. The old 0.250 compiler compatibility patch is no longer needed.
+
+`arcade.flt` selects sources with `GAME`/`GAMEL` registrations from the 0.289 `mame.lst`, excluding non-arcade registrations in shared sources. Upstream no longer supplies this filter. The split Cave CV1000 blitter sources are included explicitly because the source scanner does not discover them through headers. Update the filter with each MAME upgrade.
+
+The backend exposes a fixed 48 kHz stereo sink to MAME’s new audio routing interface; OpenEmu continues to handle playback and frame pacing.
 
 ## Build
 
@@ -45,7 +49,7 @@ MAME/build/XcodeDerived/Build/Products/Release/MAME.oecoreplugin
 cd MAME/deps/mame
 make NOWERROR=1 REGENIE=1 macosx_arm64_clang \
   OSD="headless" verbose=1 TARGETOS="macosx" CONFIG="release" \
-  TARGET=mame SUBTARGET=arcade MACOSX_DEPLOYMENT_TARGET=11.0 \
+  TARGET=mame SUBTARGET=arcade SOURCEFILTER=../../arcade.flt MACOSX_DEPLOYMENT_TARGET=12.0 \
   -j"$(sysctl -n hw.ncpu)"
 install_name_tool -id mamearcade_headless.dylib mamearcade_headless.dylib
 ```
@@ -61,7 +65,7 @@ Install the built plugin with the repo helper, which avoids stale bundle merges:
 ./Scripts/verify-core-installed.sh MAME --release
 ```
 
-Use a MAME 0.250-compatible ROM set. Validate both:
+Use a MAME 0.289-compatible ROM set. Older ROM sets may need updating; save states from 0.250 are not guaranteed to load. Validate both:
 
 - A known sprite-based arcade game, to confirm the core path works.
 - Sega Virtua Racing, to investigate the missing polygon issue from #500.

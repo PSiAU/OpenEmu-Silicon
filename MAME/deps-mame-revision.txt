@@ -1,3 +1,4 @@
-OpenEmu-Silicon/mame commit: fac13e827b7b8cfa4ee4f5760198d31241e2a544
-branch: mame0250-headless
-source: https://github.com/OpenEmu-Silicon/mame.git
+mamedev/mame commit: f34f02505e32c1993c6a782b6814232cbfc74e36
+tag: mame0289 (MAME 0.289)
+source: https://github.com/mamedev/mame.git
+headless backend: patches/mame-0289-headless.patch, ported from OpenEmu-Silicon/mame fac13e827b7b8cfa4ee4f5760198d31241e2a544
